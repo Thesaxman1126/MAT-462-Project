@@ -1,3 +1,5 @@
+%% Used to make contour plots for figures 1 - 3 %%
+
 clear all
 N = 100; % Number of points evaluated
 gamma1 = 0.5;
