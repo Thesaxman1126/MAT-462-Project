@@ -3,15 +3,9 @@
 Created on Tue Oct 26 16:55:04 2021
 
 @author: Nick Navas
+@class: MAT 462
 
-TO-DO
-------
-Things to fix:
-    - issue at (1,0) corner (need to make matrix 1 larger on each side) -> Nmax + 2 x Mmax + 2  
-    
-Things to add:
-    - Time evolution
-    
+Used to generate figures 4-8    
 """
 # IMPORTS #
 import scipy.special #Used for Bessel I 
