@@ -3,9 +3,10 @@
 Created on Tue Oct 26 16:55:04 2021
 
 @author: Nick Navas
-@class: MAT 462
+@class: MAT 462 
 
-Used to generate figures 7-12    
+Used to generate figures
+    
 """
 # IMPORTS #
 import scipy.special #Used for Bessel I 
@@ -15,7 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D #Used for some 3D-plotting
 from datetime import datetime #Used in runtime calculation
 
 # FUNCTIONS #
-# Tri Diagonal Matrix Algorithm(a.k.a Thomas algorithm) solver: Fast Tridiagonal Algorithm
+# Tri Diagonal Matrix Algorithm(a.k.a Thomas algorithm) solver
 def TDMAsolver(a, b, c, d):
  
     nf = len(d) # number of equations
@@ -48,7 +49,7 @@ def v_analytic(r,z,gamma):
     a= r*(1-z/gamma) 
     sums = 0
     n = 0
-    for n in range(1,50):
+    for n in range(1,26):
         sums += ((scipy.special.iv(1,(n*np.pi*r)/gamma))/(n*scipy.special.iv(1,(n*np.pi)/gamma)))*np.sin(n*np.pi*z/gamma)    
     
     return a - (2/np.pi)*sums
@@ -102,7 +103,7 @@ def plot_contour(Phi, gamma, title, filename=None, cmap=plt.cm.turbo):
 ###############################################################################
 
 # CONSTANTS/INITIALIZERS #
-Gamma = [0.5,1,2.5] #You can add to this for different gammas
+Gamma = [0.5,1,2.5] #[0.5,1,2.5] #You can add to this for different gammas
 Nmax = 100 #Size of the nxn matrix
 start = datetime.now()
 
@@ -217,21 +218,23 @@ for GAMMA in Gamma:
     for r in range(Nmax+2):
         for z in range(Mmax+2):
     
-            Error_MAT[r][z] = (v_exact[r][z]-w[r][z])**2
+            Error_MAT[r][z] = np.abs((v_exact[r][z]-w[r][z])/v_exact[r][z])
     
     #l_2_norm. np.sum() sums over whole array
-    l_2_norm = np.sqrt(1/((Nmax+3) * (Mmax+3))*np.sum(Error_MAT))
-    
-    
+    l_2_norm_exact = np.sqrt(1/((Nmax+3) * (Mmax+3))*np.sum(np.power(v_exact,2)))
+    l_2_norm_approx = np.sqrt(1/((Nmax+3) * (Mmax+3))*np.sum(np.power(w,2)))
+    l_2_norm_error = (l_2_norm_exact - l_2_norm_approx)/l_2_norm_exact
+
     #Plot Error array in case you want a visual to see where the error is worse 
-    #(uncomment line below to do said action)
+
     
-    plot_contour(np.sqrt((1/((Nmax+1) * (Mmax+1)))*Error_MAT), GAMMA, rf'Error Plot for $\Gamma$ = {GAMMA}')
+    plot_contour((Error_MAT), GAMMA, rf'Error Plot for $\Gamma$ = {GAMMA}')
     
     #print(rf"The value of v(1,0) for gamma = {GAMMA} is: ",v_numerical[-1][0],'\n') #Prints value at v(1,0).
-    print(rf"The L_2 norm error for gamma = {GAMMA} is: ", l_2_norm,'\n') #Prints L_2 norm.
+    print(rf"The rel error for gamma = {GAMMA} is: ", l_2_norm_error,'\n') #Prints rel error
+    print(rf"The l2_approx for gamma = {GAMMA} is: ", l_2_norm_approx,'\n') #Prints L_2 norm.
     print(rf'The run time for $\Gamma$ = {GAMMA}:', datetime.now() - loop_start, '\n')
     
-#print("Total run time:", datetime.now() - start)
+print("Total run time:", datetime.now() - start)
 
 ###############################################################################
