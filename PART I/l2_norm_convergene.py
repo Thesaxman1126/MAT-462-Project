@@ -1,4 +1,4 @@
-# Used to generate figures x, y, and z
+# Used to generate figures 4, 5, and 6
 
 import scipy.special #Used for Bessel I 
 import numpy as np #Used for arrays and matrix like structures
@@ -58,15 +58,22 @@ for term in terms:
 print(datetime.now() - loop_start)  
 
 plot1 = plt.figure(1)
-plt.title(r'l2 norm for $\Gamma$ = 0.5')
+plt.title(r'l2 norm against # terms for $\Gamma$ = 0.5')
+plt.xlabel("Number of terms")
+plt.ylabel("l2 norm")
 plt.plot(terms, l2_0_5, label = r"$\Gamma$ = 0.5")
 
+
 plot1 = plt.figure(2)
-plt.title(r'l2 norm for $\Gamma$ = 1')
+plt.title(r'l2 norm against # terms for $\Gamma$ = 1')
+plt.xlabel("Number of terms")
+plt.ylabel("l2 norm")
 plt.plot(terms, l2_1, label = r"$\Gamma$ = 1")
 
 plot1 = plt.figure(3)
-plt.title(r'l2 norm for $\Gamma$ = 2.5')
+plt.title(r'l2 norm against # terms for $\Gamma$ = 2.5')
+plt.xlabel("Number of terms")
+plt.ylabel("l2 norm")
 plt.plot(terms, l2_2_5, label = r"$\Gamma$ = 2.5")
 plt.legend()
 plt.show()
