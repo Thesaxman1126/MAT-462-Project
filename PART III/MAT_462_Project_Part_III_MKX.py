@@ -178,7 +178,7 @@ anim = animation.FuncAnimation(plt.figure(), animate, interval=1, frames=143, re
 
 
 save_start = datetime.now()
-f = r"c://Users/thesa/Desktop/MAT_462_Time_Evo_MKX_Ver_II.gif" 
+f = r"c://Users/[USER HERE]/Desktop/MAT_462_Time_Evo_MKX_Ver_II.gif" 
 writergif = animation.PillowWriter(fps=60) 
 anim.save(f, writer=writergif)
 print('Gif save run time: ', datetime.now()-save_start)
