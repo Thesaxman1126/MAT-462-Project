@@ -5,7 +5,7 @@ Created on Tue Oct 26 16:55:04 2021
 @author: Nick Navas
 @class: MAT 462
 
-Used to generate figures 4-8    
+Used to generate figures 7-12    
 """
 # IMPORTS #
 import scipy.special #Used for Bessel I 
