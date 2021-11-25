@@ -1,4 +1,5 @@
-#There will be something here
+# Used to generate figures x, y, and z
+
 import scipy.special #Used for Bessel I 
 import numpy as np #Used for arrays and matrix like structures
 import matplotlib.pyplot as plt #Used for plotting 
@@ -21,7 +22,7 @@ def l_2(v, nr , nz):
     v_norm_l = np.sqrt(1/((nr+1)*(nz+1)) * np.sum(np.power(v,2)))
     return v_norm_l
 
-terms = np.linspace(2,75,74)
+terms =list(np.linspace(2,50,49))
 
 v0_5 = np.zeros((100,50))
 
@@ -36,7 +37,7 @@ l2_1 = []
 l2_2_5 = []
 
 loop_start = datetime.now()
-for term in range(100):
+for term in terms:
     for r in range(100): 
         for z in range(50):
             
@@ -48,16 +49,24 @@ for term in range(100):
             
         for k in range(250):
             
-            v0_5[r][z] = v_analytic(1/(101)*r, 1/(250+1)*z*2.5, 2.5, term)
-    
+            v2_5[r][z] = v_analytic(1/(101)*r, 1/(250+1)*z*2.5, 2.5, term)
+        
     l2_0_5.append(l_2(v0_5, 100, 50))
     l2_1.append(l_2(v1, 100, 100))
     l2_2_5.append(l_2(v2_5, 100, 250))
     
-print(datetime.now() - loop_start)    
-plt.title(r'l2 norm for varying $\gamma$')
-plt.plot(terms, l2_0_5, label = "gamma = 0.5")
-plt.plot(terms, l2_1, label = "gamma = 1")
-plt.plot(terms, l2_2_5, label = "gamma = 2.5")
+print(datetime.now() - loop_start)  
+
+plot1 = plt.figure(1)
+plt.title(r'l2 norm for $\Gamma$ = 0.5')
+plt.plot(terms, l2_0_5, label = r"$\Gamma$ = 0.5")
+
+plot1 = plt.figure(2)
+plt.title(r'l2 norm for $\Gamma$ = 1')
+plt.plot(terms, l2_1, label = r"$\Gamma$ = 1")
+
+plot1 = plt.figure(3)
+plt.title(r'l2 norm for $\Gamma$ = 2.5')
+plt.plot(terms, l2_2_5, label = r"$\Gamma$ = 2.5")
 plt.legend()
 plt.show()
