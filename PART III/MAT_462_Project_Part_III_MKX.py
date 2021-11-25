@@ -128,8 +128,11 @@ def plotheatmap(v_k, k):
 v = np.zeros((Size,Size))
 v[:,0] = r 
 
+
+animation_matrix = np.zeros((1,50,50)) # This is where I store the timesteps for the animation
+animation_matrix[0,:,0] = r 
+
 j = Heun(v)
-#j[:,0] = r 
 
 v = np.array([v,j])
 
@@ -142,7 +145,12 @@ h[0] = k
 v = np.vstack([v,h])
 check(v[-1],[-2])
 print(check(v[-1],v[-2]))
+
+
+
 inter_num = 0
+
+
 while check(v[-1],v[-2]) == False:
     inter_num += 1
     l = np.zeros((1,50,50), dtype = np.float64)
@@ -151,21 +159,26 @@ while check(v[-1],v[-2]) == False:
     l[0] = g
     
     v = np.vstack([v,l])
+    if inter_num % 50 == 0:
+        animation_matrix = np.vstack([animation_matrix,l]) 
+    
     if inter_num == max_interation -3: #manual kill in case things blow up
         print('Rel error at the end is' , np.abs((l_2(v[-1]) - l_2(v[-2]))/l_2(v[-1])))
         break
+
     
+animation_matrix = np.vstack([animation_matrix,l])
 plot_contour(v[-1], 1.5, 'TEST GRAPH')
 
 print('Error between last time steps and exact: ', np.abs((l_2(w) - l_2(v[-1])))/l_2(w))     
 def animate(k):
-    plotheatmap(np.transpose(v[k]), k)
+    plotheatmap(np.transpose(animation_matrix[k]), k)
 
-anim = animation.FuncAnimation(plt.figure(), animate, interval=1, frames=max_interation, repeat=True, save_count=1500) 
+anim = animation.FuncAnimation(plt.figure(), animate, interval=1, frames=143, repeat=True, save_count=1500) 
 
 
 save_start = datetime.now()
-f = r"c://Users/[YOUR USER HERE]/Desktop/MAT_462_Time_Evo_MKX.gif" 
+f = r"c://Users/thesa/Desktop/MAT_462_Time_Evo_MKX_Ver_II.gif" 
 writergif = animation.PillowWriter(fps=60) 
 anim.save(f, writer=writergif)
 print('Gif save run time: ', datetime.now()-save_start)
