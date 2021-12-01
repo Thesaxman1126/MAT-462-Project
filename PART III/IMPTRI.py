@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Oct 26 16:55:04 2021
+
 @author: Nick Navas
+
+TO-DO
+------
+Things to fix:
+    - issue at (1,0) corner (need to make matrix 1 larger on each side) -> Nmax + 2 x Mmax + 2  
+    
+Things to add:
+    - Time evolution
     
 """
 # IMPORTS #
@@ -105,7 +115,7 @@ start = datetime.now()
 for GAMMA in Gamma: 
 #while GAMMA == 1:
     loop_start = datetime.now()
-    Mmax = 48 #int(Nmax * GAMMA) #Sixe of mxm matrix
+    Mmax = 73 #Sixe of mxm matrix
 
     #Array for exact answer
     v_exact = np.zeros((Nmax+2,Mmax+2), dtype = np.float64 ) #Create array 
