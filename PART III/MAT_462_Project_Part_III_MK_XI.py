@@ -85,9 +85,9 @@ def l_2(v, nr = Size, nz = Size):
     return v_norm_l
 
 def RHS(v):
-    u = np.zeros((Size,Size))
+    u = np.zeros((Size,75))
     for i in range(1,Size-1):
-        for j in range(1,Size-1):
+        for j in range(1,75-1):
             a = (v[i+1,j] - 2*v[i,j] + v[i-1,j])
             b = (v[i+1,j] - v[i-1,j]) / (2*i)
             c = v[i,j]/i**2
@@ -125,18 +125,19 @@ def plotheatmap(v_k, k):
 
     return plt
 
-v = np.zeros((Size,Size))
+
+v = np.zeros((Size,int(Size*Gamma)))
 v[:,0] = r 
 
 
-animation_matrix = np.zeros((1,50,50)) # This is where I store the timesteps for the animation
+animation_matrix = np.zeros((1,50,int(50*Gamma))) # This is where I store the timesteps for the animation
 animation_matrix[0,:,0] = r 
 
 j = Heun(v)
 
 v = np.array([v,j])
 
-h = np.zeros((1,50,50))
+h = np.zeros((1,50,int(50*Gamma)))
 k = Heun(v[-1])
 #k[:,0] = r 
 
@@ -153,7 +154,7 @@ inter_num = 0
 
 while check(v[-1],v[-2]) == False:
     inter_num += 1
-    l = np.zeros((1,50,50), dtype = np.float64)
+    l = np.zeros((1,50,int(50*Gamma)), dtype = np.float64)
     g = Heun(v[-1])
     #g[:,0] = r
     l[0] = g
@@ -167,7 +168,7 @@ while check(v[-1],v[-2]) == False:
         break
 
     
-animation_matrix = np.vstack([animation_matrix,l])
+#animation_matrix = np.vstack([animation_matrix,l])
 plot_contour(v[-1], 1.5, 'TEST GRAPH')
 
 print('Error between last time steps and exact: ', np.abs((l_2(w) - l_2(v[-1])))/l_2(w))     
@@ -178,7 +179,7 @@ anim = animation.FuncAnimation(plt.figure(), animate, interval=1, frames=143, re
 
 
 save_start = datetime.now()
-f = r"c://Users/[USER HERE]/Desktop/MAT_462_Time_Evo_MKX_Ver_II.gif" 
+f = r"c://Users/thesa/Desktop/MAT_462_Time_Evo_MKX_Ver_II_Re_1.gif" 
 writergif = animation.PillowWriter(fps=60) 
 anim.save(f, writer=writergif)
 print('Gif save run time: ', datetime.now()-save_start)
