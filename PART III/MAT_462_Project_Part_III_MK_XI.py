@@ -39,7 +39,7 @@ Gamma = 1.5 #Aspect ratio
 tolerance= 1e-5 #Min difference to test for steady state
 r = np.linspace(0,1,Size)
 max_interation = 7500 #sort of a manual killswitch to stop code from 
-#max_iter_time = v.shape[0]
+inter_num = 0 #interation counter (used in checking loop)
 
 # FUNCTIONS #
 def plot_contour(Phi, gamma, title, filename=None, cmap=plt.cm.turbo):
@@ -80,7 +80,6 @@ def plot_contour(Phi, gamma, title, filename=None, cmap=plt.cm.turbo):
     cb = fig.colorbar(cset, shrink=0.5, aspect=5)
     
 def l_2(v, nr = Size, nz = Size):
-    
     v_norm_l = np.sqrt(1/((nr+1)*(nz+1)) * np.sum(np.power(v,2)))
     return v_norm_l
 
@@ -129,10 +128,12 @@ def plotheatmap(v_k, k):
 v = np.zeros((Size,int(Size*Gamma)))
 v[:,0] = r 
 
-
+#matrix for animation
 animation_matrix = np.zeros((1,50,int(50*Gamma))) # This is where I store the timesteps for the animation
-animation_matrix[0,:,0] = r 
+animation_matrix[0,:,0] = r #this has it only with the rotating bottom and zero everywhere else
 
+
+#Some testing I did that I kept
 j = Heun(v)
 
 v = np.array([v,j])
@@ -148,40 +149,55 @@ check(v[-1],[-2])
 print(check(v[-1],v[-2]))
 
 
+# Idea behind method #
+#Think of a stack of two cards here. The old frame is the top card and the new frame is the bottom.
+#Once I compare the two I throw away the old card and put a new card below the remaining card.
+#I count every card and I make a stack of every 50th card 
 
-inter_num = 0
+#The two cards initiallly 
+matrix_checker = np.zeros((2,50,int(50*Gamma)), dtype = np.float64)
+matrix_checker[-1] = h[0]
+matrix_checker[0] = j
 
+#initializer for loop
+l = np.zeros((1,50,int(50*Gamma)), dtype = np.float64)
 
+# CHECKING LOOP #
 while check(v[-1],v[-2]) == False:
     inter_num += 1
-    l = np.zeros((1,50,int(50*Gamma)), dtype = np.float64)
-    g = Heun(v[-1])
+
+    g = Heun(matrix_checker[0])
     #g[:,0] = r
     l[0] = g
-    
-    v = np.vstack([v,l])
+    matrix_checker[-1] = matrix_checker[0]
+    matrix_checker[0] = l[0]
     if inter_num % 50 == 0:
         animation_matrix = np.vstack([animation_matrix,l]) 
     
     if inter_num == max_interation -3: #manual kill in case things blow up
-        print('Rel error at the end is' , np.abs((l_2(v[-1]) - l_2(v[-2]))/l_2(v[-1])))
+        print('Rel error at the end is' , np.abs((l_2(matrix_checker[-1]) - l_2(matrix_checker[-2]))/l_2(matrix_checker[-1])))
         break
 
     
-#animation_matrix = np.vstack([animation_matrix,l])
+animation_matrix = np.vstack([animation_matrix,l])
 plot_contour(v[-1], 1.5, 'TEST GRAPH')
 
-print('Error between last time steps and exact: ', np.abs((l_2(w) - l_2(v[-1])))/l_2(w))     
+#error between the exact and last numerical solution
+print('Error between last time steps and exact: ', np.abs((l_2(w) - l_2(matrix_checker[-1])))/l_2(w))     
+
+# ANIMATION #
 def animate(k):
     plotheatmap(np.transpose(animation_matrix[k]), k)
 
 anim = animation.FuncAnimation(plt.figure(), animate, interval=1, frames=143, repeat=True, save_count=1500) 
 
-
+# Saving the gif file
 save_start = datetime.now()
 f = r"c://Users/thesa/Desktop/MAT_462_Time_Evo_MKX_Ver_II_Re_1.gif" 
 writergif = animation.PillowWriter(fps=60) 
 anim.save(f, writer=writergif)
 print('Gif save run time: ', datetime.now()-save_start)
 
+
+# Total run time
 print('total run time: ', datetime.now() - start)
