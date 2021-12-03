@@ -179,7 +179,7 @@ while check(v[-1],v[-2]) == False:
         break
 
     
-animation_matrix = np.vstack([animation_matrix,l])
+animation_matrix = np.vstack([animation_matrix,l]) #Final size here 151,50,75
 plot_contour(v[-1], 1.5, 'TEST GRAPH')
 
 #error between the exact and last numerical solution
@@ -193,7 +193,7 @@ anim = animation.FuncAnimation(plt.figure(), animate, interval=1, frames=143, re
 
 # Saving the gif file
 save_start = datetime.now()
-f = r"c://Users/thesa/Desktop/MAT_462_Time_Evo_MKX_Ver_II_Re_1.gif" 
+f = r"c://Users/[COMPUTER'S USER HERE]/Desktop/MAT_462_Time_Evo_MKX_Ver_II_Re_1.gif" 
 writergif = animation.PillowWriter(fps=60) 
 anim.save(f, writer=writergif)
 print('Gif save run time: ', datetime.now()-save_start)
