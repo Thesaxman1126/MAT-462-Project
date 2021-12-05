@@ -1,6 +1,6 @@
 function detadt = RHS_eta(v, psi, eta, dr, dz,Re)
 [nr, nz] = size(v);
-detadt = zeros(size(V));
+detadt = zeros(size(v));
 for i = 2:nr-1
     for j =2:nz-1
         % Derivatives of eta
