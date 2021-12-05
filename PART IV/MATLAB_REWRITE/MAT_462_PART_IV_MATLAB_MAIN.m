@@ -1,4 +1,5 @@
-%% Project Part IV
+%% MAT 462 PART IV: MAIN METHOD
+
 clear all; % Clear all variables
 close all; % Close all figures 
 clc; % Clear console
@@ -6,19 +7,19 @@ tic % Starts timer
 
 %% Constants and givens
 
-Re = 1; % Reynolds Number
+Re = 1000; % Reynolds Number
 Gamma = 1.5; % Aspect ratio
 N = 100; nr = N; nz = Gamma*N; % Basis for grid
 dr = 1/100; dz = dr;           % Spacing in r and z
-dt = 1e-4/Re;                  % Time step 
+dt = 1e-1/Re;                  % Time step 
 r = linspace(0,1,N);           % This is the discrete rotating bottom
 
 %% Array intialization for v, eta, psi
 
-v = zeros(nr,nz); % Velocity
-v(:,1) = r; % This is the boundary condition v(r,0,t) = r for r \in [0,1]
-psi_nm = zeros(nr,nz); % Streamfn
-eta_nm = zeros(nr,nz); % Vorticity 
+v_k = zeros(nr,nz); % Velocity
+v_k(:,1) = r; % This is the boundary condition v(r,0,t) = r for r \in [0,1]
+psi_k = zeros(nr,nz); % Streamfn
+eta_k = zeros(nr,nz); % Vorticity 
 
 %% A_nn Matrix
 
@@ -60,18 +61,112 @@ U_nm = zeros(nr-2,nz-2); % Initialize U_nm
 %% LU decomp
 
 % This will 3D arrays as a way to have L U and P for ALL eigenvalues
-lower_diag = zeros(nz-2,nz-2,nr-2); % Lower diagonal matrix L
-upper_diag = zeros(nz-2,nz-2,nr-2); % Upper diagonal matrix U
-
-for i = 1:nr-2 %LU decompose ance store
+lower_diag = zeros(nz-2,nz-2,nr-2); % Lower diagonal matrix L initializer
+upper_diag = zeros(nz-2,nz-2,nr-2); % Upper diagonal matrix U initializer
+permutation_mat = zeros(nz-2,nz-2,nr-2); % Perumtation matrix initializer
+for i = 1:nr-2 %LU decompose 
     
-    [lower_diag(:,:,i),upper_diag(:,:,i)] = lu(B_mm + eigenvalues(i) * I_mm);     
+    [lower_diag(:,:,i),upper_diag(:,:,i),permutation_mat(:,:,i)] = lu(B_mm + eigenvalues(i) * I_mm);     
 end
 
 %% Huen loop
-index_i = 0; index_j = 0; Rel_error = 1;
+
+% This will have hierarchy of solving in this order
+% begin loop
+% V -> ETA -> PSI -> check -> repeat (if check fails)
+% end loop 
+
+%$ Initializers
+% indexes and error
+index_i = 0; index_j = 0; Rel_error = 1; % note Rel_error is non zero to start since 0< 10e-5
+time_step_counter = 0; % Used to count how many steps this will take
+
+% Predictor and corrected matricies
+% Predictors
+v_predict = zeros(nr,nz);
+eta_predict = zeros(nr,nz);
+
+% Correctors
+v_correct = zeros(nr,nz);
+eta_correct = zeros(nr,nz);
+
+% Main loop
 while Rel_error > 10e-5
+    %% v predict/correct
+    v_predict = v_k + dt * RHS_V(v_k, psi_k, dr, dz, Re); % Predict
+    v_correct = v_k + dt/2 * (RHS_V(v_k, psi_k, dr, dz, Re) + RHS_V(v_predict, psi_k, dr, dz, Re)); % Correct
     
+    % Don't store the v_correct as v_k yet to use since we need to use the
+    % same v_k for eta_k
+    
+    %% eta predict/correct
+    eta_predict = v_k + dt * RHS_eta(v_k, psi_k, eta_k, dr, dz, Re); % Predict
+    eta_correct = v_k + dt/2 * (RHS_eta(v_k, psi_k, eta_k, dr, dz, Re) + RHS_eta(v_k, psi_k, eta_predict, dr, dz, Re)); % Correct  
+    
+    %% Solve Poisson's Equation using the A Psi + Psi B = F method 
+    % Populate F_nm
+    for  i = 1:nr-2
+        for j = 1:nz-2
+            
+            F_nm(i,j) = -i*dr*Eta(i+1,j+1);
+            
+        end
+    end
+    % Construct H_mn matrix
+    H_mn = transpose(F_nm)*transpose(inv_Z_nn);
+    
+    % LU solver loop
+    % METHOD L*U*u = h -> let y = U*u -> L*y = h, solve for y -> U*u = y ->
+    % solve for u
+    for i = 1:nr-2
+       
+        y_vector = lower_diag(:,:,i)\(permutation_mat(:,:,i) * H_Mn(:,i)); % Let y = U*u -> L*y - h, solve for
+        U_nm(i,:) = upper_diag(:,:,i)\y_vector; % U*u = y -> solve for u
+        
+    end
+    
+    % Populate psi (NOTE THE BOUNDARY IS 0 ON ALL WALLS SO ONLY UPDATES INTERIOR)
+    psi(2:nr-1,nz-1) = z_nn * U_nm;
+    
+    %% Update eta at the walls
+    
+    % Side wall 
+    for j = 1:nz
+       
+        eta_correct(nr,j) = (psi(nr-2,j) - 8*psi(nr-1,j))/(2*i*dr^3);
+        
+    end
+    
+    % Top and bottom walls
+    for i = 1:nr
+       
+        eta_correct(i,nz) = (psi(i,nz-2)-psi*PSI(i,nz-1))/(2*i*dr*dz^2); % Top wall
+        eta_correct(i,1) = (psi(i,2)-psi*PSI(i,1))/(2*i*dr*dz^2); % Bottom Wall
+        
+    end
+    
+    %% Check Error
+    if rem(i_index,50) == 0 % check every 50 interations
+        Rel_error = (l2_norm(v_correct,nr,nz) - l2_norm(v_k,nr,nz))/(l2_norm(v_correct,nr,nz));
+        error(j_index) = Rel_error;
+        
+        %% Plot Contour Plots
+        
+        % Plot v(r,z)
+        figure();
+        contourf(transpose(v_k))
+        set(gca,'DataAspectRatio',[1 1 1], 'XTick',0:0:0,'YTick',0:0:0);
+        saveas(gcf,sprintf('%.0f.png',j_index))
+        
+        F(j_index) = getframe;
+        j_index = j_index + 1; 
+        
+    end
+    
+    v_k = v_correct;
+    eta_k = eta_correct;
+    
+    i_index = i_index + 1;
     
 end
 toc
