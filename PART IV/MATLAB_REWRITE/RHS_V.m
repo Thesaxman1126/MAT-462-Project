@@ -1,6 +1,8 @@
-function dvdt = RHS_V(v,psi,dr,dz,Re) % This is the RHS of equation 34 discretetized 
+%% MAT 462 PART IV: RHS OF dv/dt 
+
+function dvdt = RHS_V(v,psi,dr,dz,Re)% This is the RHS of equation 34 discretetized 
 [nr, nz] = size(v);
-dvdt = zeros(size(V));
+dvdt = zeros(size(v));
 % This works on INTERIOR POINTS so 2->nr-1 and 2->nz-1
 for i = 2:nr-1
     for j = 2:nz-1
