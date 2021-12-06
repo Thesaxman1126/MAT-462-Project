@@ -13,7 +13,7 @@ N = 100; nr = N; nz = Gamma*N; % Basis for grid
 dr = 1/100; dz = dr;           % Spacing in r and z
 dt = 1e-1/Re;                  % Time step 
 r = linspace(0,1,N);           % This is the discrete rotating bottom
-
+z = linspace(1,Gamma,Gamma*N);
 %% Array intialization for v, eta, psi
 
 v_k = zeros(nr,nz); % Velocity
@@ -40,7 +40,7 @@ A_nn = diag(a_main)+diag(a_sub,-1)+diag(a_super,1);  % Use the vectors to form d
 
 %% B_nn Matrix
 
-B_mm = zeros(nz-2);                                  % Initalize B_mm
+
 b_main = -2/dz^2 + zeros(1,nz-2);                    % Define main diagonal values since it's const
 b_super_sub = 1/dz^2 + zeros(1,nz-3);                % Define the super/sub diagonal values since they're const
 
@@ -78,7 +78,7 @@ end
 
 %$ Initializers
 % indexes and error
-index_i = 0; index_j = 0; Rel_error = 1; % note Rel_error is non zero to start since 0< 10e-5
+i_index = 1; j_index = 1; Rel_error = 1; % note Rel_error is non zero to start since 0< 10e-5
 time_step_counter = 0; % Used to count how many steps this will take
 
 % Predictor and corrected matricies
@@ -91,24 +91,24 @@ v_correct = zeros(nr,nz);
 eta_correct = zeros(nr,nz);
 
 % Main loop
-while Rel_error > 10e-5
+while Rel_error > 1e-5
     %% v predict/correct
-    v_predict = v_k + dt * RHS_V(v_k, psi_k, dr, dz, Re); % Predict
-    v_correct = v_k + dt/2 * (RHS_V(v_k, psi_k, dr, dz, Re) + RHS_V(v_predict, psi_k, dr, dz, Re)); % Correct
+    v_predict = v_k + dt * RHS_v_v2(v_k, psi_k, dr, dz, Re); % Predict
+    v_correct = v_k + dt/2 * (RHS_v_v2(v_k, psi_k, dr, dz, Re) + RHS_v_v2(v_predict, psi_k, dr, dz, Re)); % Correct
     
     % Don't store the v_correct as v_k yet to use since we need to use the
     % same v_k for eta_k
     
     %% eta predict/correct
-    eta_predict = v_k + dt * RHS_eta(v_k, psi_k, eta_k, dr, dz, Re); % Predict
-    eta_correct = v_k + dt/2 * (RHS_eta(v_k, psi_k, eta_k, dr, dz, Re) + RHS_eta(v_k, psi_k, eta_predict, dr, dz, Re)); % Correct  
+    eta_predict = v_k + dt * RHS_eta_v2(v_k, psi_k, eta_k, dr, dz, Re); % Predict
+    eta_correct = v_k + dt/2 * (RHS_eta_v2(v_k, psi_k, eta_k, dr, dz, Re) + RHS_eta_v2(v_k, psi_k, eta_predict, dr, dz, Re)); % Correct  
     
     %% Solve Poisson's Equation using the A Psi + Psi B = F method 
     % Populate F_nm
     for  i = 1:nr-2
         for j = 1:nz-2
             
-            F_nm(i,j) = -i*dr*Eta(i+1,j+1);
+            F_nm(i,j) = -i*dr*eta_k(i+1,j+1);
             
         end
     end
@@ -120,28 +120,28 @@ while Rel_error > 10e-5
     % solve for u
     for i = 1:nr-2
        
-        y_vector = lower_diag(:,:,i)\(permutation_mat(:,:,i) * H_Mn(:,i)); % Let y = U*u -> L*y - h, solve for
+        y_vector = lower_diag(:,:,i)\(permutation_mat(:,:,i) * H_mn(:,i)); % Let y = U*u -> L*y - h, solve for
         U_nm(i,:) = upper_diag(:,:,i)\y_vector; % U*u = y -> solve for u
         
     end
     
     % Populate psi (NOTE THE BOUNDARY IS 0 ON ALL WALLS SO ONLY UPDATES INTERIOR)
-    psi(2:nr-1,nz-1) = z_nn * U_nm;
+    psi(2:nr-1,2:nz-1) = Z_nn * U_nm;
     
     %% Update eta at the walls
     
     % Side wall 
     for j = 1:nz
        
-        eta_correct(nr,j) = (psi(nr-2,j) - 8*psi(nr-1,j))/(2*i*dr^3);
+        eta_correct(nr,j) = (psi_k(nr-2,j) - 8*psi_k(nr-1,j))/(2*i*dr^3);
         
     end
     
     % Top and bottom walls
     for i = 1:nr
        
-        eta_correct(i,nz) = (psi(i,nz-2)-psi*PSI(i,nz-1))/(2*i*dr*dz^2); % Top wall
-        eta_correct(i,1) = (psi(i,2)-psi*PSI(i,1))/(2*i*dr*dz^2); % Bottom Wall
+        eta_correct(i,nz) = (psi_k(i,nz-2)-psi_k(i,nz-1))/(2*i*dr*dz^2); % Top wall
+        eta_correct(i,1) = (psi_k(i,2)-psi_k(i,1))/(2*i*dr*dz^2); % Bottom Wall
         
     end
     
@@ -167,6 +167,6 @@ while Rel_error > 10e-5
     eta_k = eta_correct;
     
     i_index = i_index + 1;
-    
+    time_step_counter = time_step_counter +1;
 end
 toc
