@@ -11,7 +11,7 @@ Re = 1000; % Reynolds Number
 Gamma = 1.5; % Aspect ratio
 N = 100; nr = N; nz = Gamma*N; % Basis for grid
 dr = 1/100; dz = dr;           % Spacing in r and z
-dt = 1e-1/Re;                  % Time step 
+dt = 10^(-4);                  % Time step 
 r = linspace(0,1,N);           % This is the discrete rotating bottom
 z = linspace(1,Gamma,Gamma*N);
 %% Array intialization for v, eta, psi
@@ -126,7 +126,9 @@ while Rel_error > 1e-5
     end
     
     % Populate psi (NOTE THE BOUNDARY IS 0 ON ALL WALLS SO ONLY UPDATES INTERIOR)
-    psi(2:nr-1,2:nz-1) = Z_nn * U_nm;
+    
+    TEST = Z_nn * U_nm;
+    psi_k(2:nr-1,2:nz-1) = Z_nn * U_nm;
     
     %% Update eta at the walls
     
@@ -146,8 +148,8 @@ while Rel_error > 1e-5
     end
     
     %% Check Error
-    if rem(i_index,50) == 0 % check every 50 interations
-        Rel_error = (l2_norm(v_correct,nr,nz) - l2_norm(v_k,nr,nz))/(l2_norm(v_correct,nr,nz));
+    if rem(i_index,500) == 0 % check every 50 interations
+        Rel_error = (l2_norm_v2(v_correct,nr,nz) - l2_norm_v2(v_k,nr,nz))/(l2_norm_v2(v_correct,nr,nz));
         error(j_index) = Rel_error;
         
         %% Plot Contour Plots
@@ -168,5 +170,10 @@ while Rel_error > 1e-5
     
     i_index = i_index + 1;
     time_step_counter = time_step_counter +1;
+    if Re == 1000 
+        if time_step_counter == 1e6 
+        Rel_error = 0;
+        end
+    end
 end
 toc
