@@ -1,4 +1,6 @@
-function detadt = RHS_eta(v, psi, eta, dr, dz,Re)
+%% MAT 462 PART IV: RHS OF deta/dt 
+
+function detadt = RHS_eta_v2(v, psi, eta, dr, dz,Re)
 [nr, nz] = size(v);
 detadt = zeros(size(v));
 for i = 2:nr-1
