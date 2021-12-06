@@ -21,7 +21,7 @@ for i = 2:nr-1
        
        % FULL RHS
        dvdt(i,j) = 1/(i*dr) * psi_z*(v_r + v(i,j)/(i*dr)) - 1/(i*dr) * psi_r*v_z +...
-           1/(Re) * (v_rr + v_r/(i*dr) - v(i,j) + v_zz);
+           1/(Re) * (v_rr + v_r/(i*dr) - v(i,j)/((i*dr)^2) + v_zz);
        
     end
 end
