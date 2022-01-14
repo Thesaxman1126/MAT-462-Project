@@ -1,5 +1,5 @@
 # MAT-462-Project
-Made by Nick Navas
+Made by Nick
 
 Code for analytic solution to steady state flow is under PART I
 
