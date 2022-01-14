@@ -2,7 +2,7 @@
 """
 Created on Tue Oct 26 16:55:04 2021
 
-@author: Nick Navas
+@author: Nick 
 
 TO-DO
 ------
