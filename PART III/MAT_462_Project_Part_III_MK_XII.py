@@ -2,7 +2,7 @@
 """
 Created on Tue Nov  9 16:42:06 2021
 
-@author: Nick Navas
+@author: Nick
 @class: MAT 462
 
 PDE WE ARE SOLVING
