@@ -1,0 +1,1 @@
+Integrate[(z/gamma - 1) Sin[(m Pi z)/gamma], {z, 0, gamma}
